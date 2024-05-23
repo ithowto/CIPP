@@ -75,7 +75,38 @@ const GraphExplorer = () => {
   }, [])
 
   if (graphrequest.isSuccess) {
-    if (graphrequest.data?.Results?.length > 0) {
+    if (
+      graphrequest.data?.Metadata?.Parameters?.$select !== undefined &&
+      graphrequest.data?.Metadata?.Parameters?.$select !== '' &&
+      graphrequest.data?.Metadata?.Parameters?.$select !== null
+    ) {
+      //set columns
+      if (graphrequest.data?.Metadata?.TenantFilter === 'AllTenants') {
+        QueryColumns.data.push({
+          name: 'Tenant',
+          selector: (row) => row['Tenant'],
+          sortable: true,
+          exportSelector: 'Tenant',
+          cell: cellGenericFormatter(),
+        })
+        QueryColumns.data.push({
+          name: 'CippStatus',
+          selector: (row) => row['CippStatus'],
+          sortable: true,
+          exportSelector: 'CippStatus',
+          cell: cellGenericFormatter(),
+        })
+      }
+      graphrequest.data?.Metadata?.Parameters?.$select.split(',')?.map((value) =>
+        QueryColumns.data.push({
+          name: value,
+          selector: (row) => row[`${value.toString()}`],
+          sortable: true,
+          exportSelector: value,
+          cell: cellGenericFormatter(),
+        }),
+      )
+    } else if (graphrequest.data?.Results?.length > 0) {
       //set columns
       Object.keys(graphrequest.data?.Results[0]).map((value) =>
         QueryColumns.data.push({
@@ -121,7 +152,7 @@ const GraphExplorer = () => {
     {
       name: 'All users with email addresses',
       id: '6164e239-0c9a-4a27-9049-6250bf65a3e3',
-      params: { endpoint: '/users', $select: 'userprincipalname,mail,proxyAddresses', $filter: '' },
+      params: { endpoint: '/users', $select: 'userPrincipalName,mail,proxyAddresses', $filter: '' },
       isBuiltin: true,
     },
     {
@@ -218,6 +249,15 @@ const GraphExplorer = () => {
       },
       isBuiltin: true,
     },
+    {
+      name: 'Organization Branding',
+      id: '2ed236e2-268e-461b-9d37-98b123010667',
+      params: {
+        endpoint: 'organization/%tenantid%/branding',
+        NoPagination: true,
+      },
+      isBuiltin: true,
+    },
   ]
 
   if (customPresets?.Results?.length > 0) {
@@ -238,6 +278,9 @@ const GraphExplorer = () => {
       var select = ''
       if (params?.$select) {
         select = params.$select.map((p) => p.value).join(',')
+      }
+      if (params?.name) {
+        params.QueueNameOverride = 'Graph Explorer - ' + params.name
       }
       execGraphRequest({
         path: 'api/ListGraphRequest',
@@ -307,7 +350,6 @@ const GraphExplorer = () => {
 
   function getPresetProps(values) {
     var newvals = Object.assign({}, values)
-    console.log(newvals)
     if (newvals?.$select !== undefined && Array.isArray(newvals?.$select)) {
       newvals.$select = newvals?.$select.map((p) => p.value).join(',')
     }
@@ -316,8 +358,6 @@ const GraphExplorer = () => {
     delete newvals['IsShared']
     return newvals
   }
-
-  console.log(graphrequest.data)
 
   return (
     <>
@@ -494,6 +534,18 @@ const GraphExplorer = () => {
                               placeholder="Select the number of rows to return"
                             />
                             <WhenFieldChanges field="reportTemplate" set="$top" />
+                            <RFFCFormSwitch
+                              name="ReverseTenantLookup"
+                              label="Reverse Tenant Lookup"
+                            />
+                            <WhenFieldChanges field="reportTemplate" set="ReverseTenantLookup" />
+                            <RFFCFormInput
+                              type="text"
+                              name="$format"
+                              label="Format"
+                              placeholder="Optional format to return (e.g. application/json)"
+                            />
+                            <WhenFieldChanges field="reportTemplate" set="$format" />
                           </CCol>
                           <CCol>
                             <RFFCFormInput
@@ -547,6 +599,16 @@ const GraphExplorer = () => {
                               placeholder="Enter OData search query"
                             />
                             <WhenFieldChanges field="reportTemplate" set="$search" />
+                            <RFFCFormInput
+                              type="text"
+                              name="ReverseTenantLookupProperty"
+                              label="Reverse Tenant Lookup Property"
+                              placeholder="Default tenantId"
+                            />
+                            <WhenFieldChanges
+                              field="reportTemplate"
+                              set="ReverseTenantLookupProperty"
+                            />
                           </CCol>
                         </CRow>
                         <CRow className="mb-3">

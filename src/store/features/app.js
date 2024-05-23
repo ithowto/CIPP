@@ -12,6 +12,8 @@ const initialState = {
   pageSizes: [25, 50, 100, 200, 500],
   TenantListSelector: false,
   defaultColumns: {},
+  newUserDefaults: {},
+  recentPages: [],
 }
 
 export const appSlice = createSlice({
@@ -45,8 +47,8 @@ export const appSlice = createSlice({
     setTenantList: (state, action) => {
       state.TenantListSelector = action.payload?.TenantListSelector
     },
-    setOffboardingDefaults: (state, action) => {
-      state.offboardingDefaults = action.payload?.offboardingDefaults
+    setUserSettingsDefaults: (state, action) => {
+      state.userSettingsDefaults = action.payload?.userSettingsDefaults
     },
     setDefaultColumns: (state, action) => {
       state.defaultColumns[action.payload.endpoint] = action.payload?.columns
@@ -56,6 +58,9 @@ export const appSlice = createSlice({
       Object.keys(action.payload?.userSettings).forEach((key) => {
         state[key] = action.payload?.userSettings[key]
       })
+    },
+    setRecentPages: (state, action) => {
+      state.recentPages = action.payload?.recentPages
     },
   },
 })
@@ -70,9 +75,11 @@ export const {
   setSidebarVisible,
   setDefaultusageLocation,
   setReportImage,
-  setOffboardingDefaults,
+  setUserSettingsDefaults,
   setUserSettings,
   setDefaultColumns,
+  setNewUserDefaults,
+  setRecentPages,
 } = appSlice.actions
 
 export default persistReducer(
