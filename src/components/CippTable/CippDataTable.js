@@ -274,7 +274,7 @@ export const CippDataTable = (props) => {
               refreshFunction={refreshFunction}
               setColumnVisibility={setColumnVisibility}
               filters={filters}
-              queryKeys={queryKey}
+              queryKeys={queryKey ? queryKey : title}
               graphFilterData={graphFilterData}
               setGraphFilterData={setGraphFilterData}
               setConfiguredSimpleColumns={setConfiguredSimpleColumns}
@@ -290,6 +290,10 @@ export const CippDataTable = (props) => {
       onChange(table.getSelectedRowModel().rows.map((row) => row.original));
     }
   }, [table.getSelectedRowModel().rows]);
+
+  useEffect(() => {
+    setConfiguredSimpleColumns(simpleColumns);
+  }, [simpleColumns]);
 
   return (
     <>
