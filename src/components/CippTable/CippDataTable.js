@@ -297,7 +297,10 @@ export const CippDataTable = (props) => {
   }, [table.getSelectedRowModel().rows]);
 
   useEffect(() => {
-    setConfiguredSimpleColumns(simpleColumns);
+    //check if the simplecolumns are an array,
+    if (Array.isArray(simpleColumns) && simpleColumns.length > 0) {
+      setConfiguredSimpleColumns(simpleColumns);
+    }
   }, [simpleColumns]);
 
   return (
@@ -322,7 +325,7 @@ export const CippDataTable = (props) => {
         </Scrollbar>
       ) : (
         // Render the table inside a Card
-        <Card style={{ width: "100%" }}>
+        <Card style={{ width: "100%" }} {...props.cardProps}>
           {cardButton || !hideTitle ? (
             <>
               <CardHeader action={cardButton} title={hideTitle ? "" : title} />
