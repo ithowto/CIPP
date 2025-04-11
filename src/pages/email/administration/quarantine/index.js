@@ -104,6 +104,7 @@ const Page = () => {
       label: "Release",
       type: "POST",
       url: "/api/ExecQuarantineManagement",
+      multiPost: true,
       data: {
         Identity: "Identity",
         Type: "!Release",
@@ -154,6 +155,11 @@ const Page = () => {
     {
       filterName: "Released",
       value: [{ id: "ReleaseStatus", value: "RELEASED" }],
+      type: "column",
+    },
+    {
+      filterName: "Requested",
+      value: [{ id: "ReleaseStatus", value: "REQUESTED" }],
       type: "column",
     },
   ];

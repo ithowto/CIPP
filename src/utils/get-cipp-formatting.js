@@ -264,12 +264,20 @@ export const getCippFormatting = (data, cellName, type, canReceive) => {
   }
 
   if (cellName === "excludedTenants") {
+    // Handle null or undefined data
+    if (data === null || data === undefined) {
+      return isText ? "No data" : <Box component="span"><Chip variant="outlined" label="No data" size="small" color="info" /></Box>;
+    }
     //check if data is an array.
     if (Array.isArray(data)) {
       return isText
-        ? data.join(", ")
+        ? data.map(item => (typeof item === 'object' && item?.label) ? item.label : item).join(", ")
         : data.map((item) => (
-            <CippCopyToClipBoard key={item.value} text={item.label} type="chip" />
+            item && <CippCopyToClipBoard
+              key={typeof item === 'object' ? item?.value || item?.label : item}
+              text={typeof item === 'object' && item?.label ? item.label : item}
+              type="chip"
+            />
           ));
     }
   }
@@ -321,6 +329,20 @@ export const getCippFormatting = (data, cellName, type, canReceive) => {
         tableTitle={getCippTranslation(cellName)}
       />
     );
+  }
+
+  if (cellName === 'AccessRights') {
+    // Handle data as an array or string
+    const accessRights = Array.isArray(data)
+      ? data.flatMap((item) => (typeof item === "string" ? item.split(", ") : []))
+      : typeof data === "string"
+      ? data.split(", ")
+      : [];
+    return isText
+      ? accessRights.join(", ")
+      : accessRights.map((accessRight) => (
+          <CippCopyToClipBoard key={accessRight} text={accessRight} type="chip" />
+        ));
   }
 
   // Handle null or undefined data
@@ -519,6 +541,18 @@ export const getCippFormatting = (data, cellName, type, canReceive) => {
 
   // Handle arrays of strings
   if (Array.isArray(data) && data.every((item) => typeof item === "string")) {
+    // if string matches json format, parse it
+    if (data.every((item) => item.startsWith("{") || item.startsWith("["))) {
+      return isText ? (
+        JSON.stringify(data)
+      ) : (
+        <CippDataTableButton
+          data={data.map((item) => JSON.parse(item))}
+          tableTitle={getCippTranslation(cellName)}
+        />
+      );
+    }
+
     //if the array is empty, return "No data"
     return isText
       ? data.join(", ")
