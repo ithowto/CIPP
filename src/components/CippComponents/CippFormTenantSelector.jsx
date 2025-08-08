@@ -13,6 +13,7 @@ export const CippFormTenantSelector = ({
   valueField = "defaultDomainName",
   required = true,
   disableClearable = true,
+  preselectedEnabled = false,
   removeOptions = [],
   includeGroups = false, // New parameter
   ...other
@@ -49,7 +50,7 @@ export const CippFormTenantSelector = ({
         value: tenant[valueField],
         label: `${tenant.displayName} (${tenant.defaultDomainName})`,
         type: "Tenant",
-        addedField: {
+        addedFields: {
           defaultDomainName: tenant.defaultDomainName,
           displayName: tenant.displayName,
           customerId: tenant.customerId,
@@ -73,8 +74,8 @@ export const CippFormTenantSelector = ({
       type={componentType}
       name={name}
       formControl={formControl}
-      preselectedValue={currentTenant ? currentTenant : null}
-      placeholder="Select a tenant"
+      preselectedValue={preselectedEnabled ?? currentTenant ? currentTenant : null}
+      label="Select a tenant"
       creatable={false}
       multiple={type === "single" ? false : true}
       disableClearable={disableClearable}
@@ -88,6 +89,7 @@ export const CippFormTenantSelector = ({
           {includeGroups ? <GroupItems>{params.children}</GroupItems> : params.children}
         </li>
       )}
+      isFetching={tenantList.isFetching || tenantGroupList.isFetching}
       {...other}
     />
   );
